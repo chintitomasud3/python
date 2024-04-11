@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Application Running Time</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #search-input {
+            width: 300px;
+            margin-bottom: 20px;
+        }
+
+        .list-group-item {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            font-size: 14px;
+            font-weight: normal;
+            margin-left: 5px;
+        }
+
+        .badge-primary {
+            background-color: #007bff;
+        }
+
+        .badge-success {
+            background-color: #28a745;
+        }
+
+        .badge-warning {
+            background-color: #ffc107;
+        }
+
+        .badge-danger {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Application Running Time</h1>
+        <input type="text" id="search-input" class="form-control" placeholder="Search...">
+        <div id="running-times" class="list-group"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#search-input").on("input", function() {
+                updateRunningTimes($(this).val());
+            });
+
+            function updateRunningTimes(searchQuery) {
+                $.ajax({
+                    url: "/get_running_time",
+                    type: "GET",
+                    data: {search: searchQuery},
+                    success: function(response) {
+                        $("#running-times").empty();
+                        for (var processName in response) {
+                            var runningTimes = response[processName];
+                            var listItem = $("<a>")
+                                .text(processName)
+                                .addClass("list-group-item list-group-item-action")
+                                .data("running-times", runningTimes);
+                            var badge = $("<span>")
+                                .text(runningTimes.length + "s")
+                                .addClass("badge");
+                            if (runningTimes.length >= 3600) {
+                                badge.addClass("badge-danger");
+                            } else if (runningTimes.length >= 1800) {
+                                badge.addClass("badge-warning");
+                            } else if (runningTimes.length >= 600) {
+                                badge.addClass("badge-success");
+                            } else {
+                                badge.addClass("badge-primary");
+                            }
+                            listItem.append(badge);
+                            $("#running-times").append(listItem);
+                        }
+                    },
+                    error: function(error) {
+                        console.log("Error:", error);
+                    }
+                });
+            }
+
+            // Initial update
+            updateRunningTimes("");
+            
+            // Click event listener for running times
+            $(document).on("click", ".list-group-item", function() {
+                var runningTimes = $(this).data("running-times");
+                alert("Running Times: " + runningTimes.join("s, ") + "s");
+            });
+        });
+    </script>
+</body>
+</html>

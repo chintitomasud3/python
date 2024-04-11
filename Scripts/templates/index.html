@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Application Running Time</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Application Running Time</h1>
+        <ul id="running-times"></ul>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            setInterval(updateRunningTimes, 1000); // Update every second
+
+            function updateRunningTimes() {
+                $.ajax({
+                    url: "/get_running_time",
+                    type: "GET",
+                    success: function(response) {
+                        $("#running-times").empty();
+                        for (var processName in response) {
+                            var runningTime = response[processName];
+                            var listItem = $("<li>").text(processName + ": " + runningTime + " seconds");
+                            $("#running-times").append(listItem);
+                        }
+                    },
+                    error: function(error) {
+                        console.log("Error:", error);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
